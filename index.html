@@ -36,6 +36,7 @@ body{
   font-family:'Archivo',-apple-system,'Segoe UI',sans-serif;
   overflow:hidden;
   height:100vh;
+  height:100dvh;
   position:relative;
 }
 body::before{
@@ -71,7 +72,7 @@ h1,h2,h3,.hero-word,.plate-title{
 
 .mono{font-family:'IBM Plex Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
 
-.deck{position:relative;height:100vh;width:100vw;z-index:1}
+.deck{position:relative;height:100vh;height:100dvh;width:100vw;z-index:1;touch-action:pan-y}
 
 .slide{
   position:absolute;
@@ -84,6 +85,7 @@ h1,h2,h3,.hero-word,.plate-title{
   pointer-events:none;
   transform:translateY(26px);
   transition:opacity .55s ease, transform .55s ease;
+  overflow-y:auto;
 }
 .slide.active{opacity:1;pointer-events:auto;transform:translateY(0)}
 
@@ -332,11 +334,18 @@ h1,h2,h3,.hero-word,.plate-title{
 .close-foot span{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.24em;color:var(--fg-mute);text-transform:uppercase}
 
 /* ---------- responsive ---------- */
+.hint-mobile{display:none}
 @media (max-width:820px){
-  body{overflow-y:auto;height:auto}
-  .deck{height:auto}
-  .slide{position:relative;min-height:100vh;opacity:1;pointer-events:auto;transform:none;transition:none}
-  .dotnav,.arrows{display:none}
+  .slide{padding-bottom:64px}
+  .arrowbtn{display:none}
+  .arrows{bottom:40px}
+  .hint-desktop{display:none}
+  .hint-mobile{display:inline}
+  .dotnav{
+    top:auto;bottom:12px;left:50%;right:auto;transform:translateX(-50%);
+    flex-direction:row;gap:9px;
+  }
+  .dot{width:7px;height:7px}
   .course{flex-direction:column;gap:36px}
   .course::before{display:none}
   .waypoint,.waypoint:nth-child(even){flex-direction:row;text-align:left;align-items:flex-start;gap:14px}
@@ -579,7 +588,8 @@ h1,h2,h3,.hero-word,.plate-title{
 <div class="dotnav" id="dotNav"></div>
 <div class="arrows">
   <button class="arrowbtn" id="prevBtn" aria-label="Previous">&#8592;</button>
-  <span class="hint" data-en="ARROW KEYS TO NAVIGATE" data-ru="СТРЕЛКИ ДЛЯ НАВИГАЦИИ">СТРЕЛКИ ДЛЯ НАВИГАЦИИ</span>
+  <span class="hint hint-desktop" data-en="ARROW KEYS TO NAVIGATE" data-ru="СТРЕЛКИ ДЛЯ НАВИГАЦИИ">СТРЕЛКИ ДЛЯ НАВИГАЦИИ</span>
+  <span class="hint hint-mobile" data-en="SWIPE TO NAVIGATE" data-ru="СВАЙП ДЛЯ НАВИГАЦИИ">СВАЙП ДЛЯ НАВИГАЦИИ</span>
   <button class="arrowbtn" id="nextBtn" aria-label="Next">&#8594;</button>
 </div>
 
@@ -656,6 +666,26 @@ h1,h2,h3,.hero-word,.plate-title{
   });
   document.getElementById('nextBtn').addEventListener('click', function(){ go(idx+1); });
   document.getElementById('prevBtn').addEventListener('click', function(){ go(idx-1); });
+
+  // ---------- touch swipe (mobile) ----------
+  var deckEl = document.getElementById('deck');
+  var touchX = 0, touchY = 0, touching = false;
+  deckEl.addEventListener('touchstart', function(e){
+    if(e.touches.length !== 1) return;
+    touchX = e.touches[0].clientX;
+    touchY = e.touches[0].clientY;
+    touching = true;
+  }, {passive:true});
+  deckEl.addEventListener('touchend', function(e){
+    if(!touching) return;
+    touching = false;
+    var t = e.changedTouches[0];
+    var dx = t.clientX - touchX;
+    var dy = t.clientY - touchY;
+    if(Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 48){
+      go(idx + (dx < 0 ? 1 : -1));
+    }
+  }, {passive:true});
 
   var wheelLock = false;
   window.addEventListener('wheel', function(e){
