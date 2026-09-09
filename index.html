@@ -362,9 +362,7 @@ h1,h2,h3,.hero-word,.plate-title{
 </style>
 
 <div class="slide-num"><b id="numCur">01</b> / <span id="numTot">09</span></div>
-<div class="topbar">
-  <button class="langtoggle" id="langBtn" type="button">EN</button>
-</div>
+<div class="topbar"></div>
 
 <div class="deck" id="deck">
 
@@ -697,25 +695,10 @@ h1,h2,h3,.hero-word,.plate-title{
     setTimeout(function(){ wheelLock = false; }, 550);
   }, {passive:true});
 
-  // ---------- language toggle ----------
-  var langBtn = document.getElementById('langBtn');
-  function setLang(lang){
-    document.querySelectorAll('[data-en]').forEach(function(el){
-      var val = lang === 'ru' ? (el.getAttribute('data-ru') || el.getAttribute('data-en')) : el.getAttribute('data-en');
-      el.innerHTML = val;
-    });
-    langBtn.textContent = lang === 'ru' ? 'EN' : 'RU';
-    document.documentElement.setAttribute('lang', lang);
-    try { localStorage.setItem('tairova-lang', lang); } catch(e){}
-  }
-  var startLang = 'ru';
-  try {
-    var saved = localStorage.getItem('tairova-lang');
-    if(saved === 'en' || saved === 'ru') startLang = saved;
-  } catch(e){}
-  setLang(startLang);
-  langBtn.addEventListener('click', function(){
-    setLang(langBtn.textContent === 'EN' ? 'en' : 'ru');
+  // ---------- language: English only ----------
+  document.querySelectorAll('[data-en]').forEach(function(el){
+    el.innerHTML = el.getAttribute('data-en');
   });
+  document.documentElement.setAttribute('lang', 'en');
 })();
 </script>
